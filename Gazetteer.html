@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gazetteer</title>
+    <link rel="icon" type="image/x-icon" href="images/favicon_io/favicon.ico">
+    <link rel="stylesheet" href="Gazetteer_files/leaflet/leaflet.css"/>
+    <link rel="stylesheet" href="../files/fontawesome-free-6.3.0-web/css/all.css">
+    <link rel="stylesheet" href="Gazetteer_files/cdnjs/easy-button.css">
+    <link rel="stylesheet" href="Gazetteer_files/Leaflet.markercluster-1.4.1\dist\MarkerCluster.css">
+    <link rel="stylesheet" href="Gazetteer_files/Leaflet.markercluster-1.4.1\dist\MarkerCluster.Default.css">
+    <link rel="stylesheet" href="Gazetteer_files/Leaflet.extraMarkers/dist/img/markers_default.png">
+    <link rel="stylesheet" href="Gazetteer_files/Leaflet.extraMarkers/dist/css/leaflet.extra-markers.min.css">
+    <link rel="stylesheet" href="../files/bootstrap-5.2.3-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="Gazetteer.css">
+</head>
+<body>
+    <div class="pre-load"></div>
+    <div class="wrapper">
+        <div id="map"></div>
+        <select name="Select a Country" id="country" class="select">
+            <option value="" id="iso" selected disabled>Choose a country</option>
+        </select>
+    </div>
+
+
+    <!--MODAL POPUPS-->
+
+    <div class="modal" id="modalCountryInfo" data-bs-backdrop="false" data-bs-keyboard="false" aria-labelledby="countryInfoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" id="modal-content-info">
+                <div class="modal-header">  
+                    <h2 class="modal-title" id="countryInfoModalLabel"></h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>         
+                </div>
+                <div class="modal-body">
+                    <div class="pre-load"></div>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">Capital</th>
+                                <th scope="col">Population</th>
+                                <th scope="col">Area in Sq Km</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td scope="row" id="capital"></th>
+                                <td><span id="population"></span></td>
+                                <td><span id="areaInSqKm"></span><sup>2</sup></td>
+                            </tr>
+                        </tbody>
+                      </table>
+                </div>
+                <div class="modal-footer">
+                    <p>Powered by <a href="http://www.geonames.org/">GeoNames.com</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modalCurrency" data-bs-backdrop="false" data-bs-keyboard="false" aria-labelledby="currencyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" id="modal-content-currency">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="currencyModalLabel"></h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>        
+                </div>
+                <div class="modal-body">
+                    <div class="pre-load"></div>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">Country Currency</th>
+                                <th scope="col">Currency Conversion</th>
+                                <th scope="col">Result</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td scope="row" id="countryCurrency"></th>
+                                <td><span id="currencyConversion"></span></td>
+                                <td><span id="result"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">   
+                    <p>Last updated <span id="lastUpdated"></span>. Powered by <a href="https://exchangeratesapi.io">exchangeratesapi.com</a></p>     
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modalWeather" data-bs-backdrop="false" data-bs-keyboard="false" aria-labelledby="weatherModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" id="modal-content-weather">
+                <div class="modal-header">  
+                    <h2 class="modal-title" id="weatherModalLabel"></h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>         
+                </div>
+                <div class="modal-body" id="modal-weather">
+                    <div class="pre-load"></div>
+                    <div class="row">
+                        <div class="col border m-2">
+                            <p class="fw-bold fs-5 mt-3">TODAY</p>
+                            <div class="row">
+                                <div class="col-4">
+                                    <p class="fw-bold fs-5" id="todayConditions"></p>
+                                </div>
+                                <div class="col-4">
+                                    <img id="weatherIcon" class="img-fluid mt-0" src="" alt="">
+                                </div>
+                                <div class="col-4">
+                                    <p class="fw-bold fs-5"><span id="todayMaxTemp"></span><sup>o</sup><span>c</span></p>
+                                    <p class="fw-light fs-5 text-secondary"><span id="todayMinTemp"></span><sup>o</sup><span>c</span></p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6 text-center">
+                                    <p class="fw-light fs-6">Humidity: <span id="humidity"></span></p>
+                                </div>
+                                <div class="col-6 text-center">
+                                    <p class="fw-light fs-6">Wind: <span id="windSpeed"></span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col border m-2">
+                            <div class="row">
+                                <div class="col text-center">
+                                    <p class="fw-bold fs-5" id="tomorrowDate"></p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-center">
+                                    <p class="fw-bold fs-5"><span id="tomorrowMaxTemp"></span><sup>o</sup>c</p>
+                                    <p class="fw-light fs-5"><span id="tomorrowMinTemp"></span><sup>o</sup>c</p>
+                                </div>
+                                <div class="col text-center">
+                                    <img id="tomorrowWeatherIcon" src="" alt="">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col border m-2">
+                            <div class="row">
+                                <div class="col text-center">
+                                    <p class="fw-bold fs-5" id="day2Date"></p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-center">
+                                    <p class="fw-bold fs-5"><span id="day2MaxTemp"></span><sup>o</sup>c</p>
+                                    <p class="fw-light fs-5"><span id="day2MinTemp"></span><sup>o</sup>c</p>
+                                </div>
+                                <div class="col text-center">
+                                    <img id="day2WeatherIcon" src="" alt="">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <p>Last updated today at <span id="lastUpdatedWeather"></span>. 
+                    <p>Powered by <a href="https://openweathermap.org/">OpenWeatherMap.com</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modalUniversity" data-bs-backdrop="false" data-bs-keyboard="false" aria-labelledby="universityModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" id="modal-content-university">
+                <div class="modal-header">  
+                    <h2 class="modal-title" id="universityModalLabel"></h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>         
+                </div>
+                <div class="modal-body" id="modal-university">
+                    <div class="pre-load"></div>
+                </div>
+                <div class="modal-footer">
+                    <p>Powered by <a href="https://github.com/Hipo/university-domains-list-api">universities.hipolabs.com</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modalHoliday" data-bs-backdrop="false" data-bs-keyboard="false" aria-labelledby="holidayModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" id="modal-content-holiday">
+                <div class="modal-header">  
+                    <h2 class="modal-title" id="holidayModalLabel"></h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>         
+                </div>
+                <div class="modal-body" id="modal-holiday">
+                    <div class="pre-load"></div>
+                </div>
+                <div class="modal-footer">
+                    <p>Powered by <a href="https://holidayapi.com">holidayapi.com</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modalAirlines" data-bs-backdrop="false" data-bs-keyboard="false" aria-labelledby="airlinesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" id="modal-content-airline">
+                <div class="modal-header">  
+                    <h2 class="modal-title" id="airlinesModalLabel"></h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>         
+                </div>
+                <div class="modal-body" id="modal-airline">
+                    <div class="pre-load"></div>
+                </div>
+                <div class="modal-footer">
+                    <p>Powered by <a href="https://app.goflightlabs.com/">flightlabs.com</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modalCity" data-bs-backdrop="false" data-bs-keyboard="false" aria-labelledby="cityModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" id="modal-content-city">
+                <div class="modal-header">  
+                    <h2 class="modal-title" id="cityModalLabel"></h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>         
+                </div>
+                <div class="modal-body" id="modal-city">
+                    <div class="pre-load"></div>
+                </div>
+                <div class="modal-footer">
+                    <p>Powered by <a href="https://app.goflightlabs.com/">flightlabs.com</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!--END MODAL-->
+
+<script src="../files/jQuery/jQuery.js"></script>
+<script src="Gazetteer_files/leaflet/leaflet.js"></script>
+<script src="Gazetteer_files/cdnjs/easy-button.js"></script>
+<script src="Gazetteer_files/Leaflet.markercluster-1.4.1\dist\leaflet.markercluster-src.js"></script>
+<script src="Gazetteer_files/Leaflet.markercluster-1.4.1\src\MarkerCluster.js"></script>
+<script src="Gazetteer_files/Leaflet.markercluster-1.4.1/src/MarkerCluster.QuickHull.js"></script>
+<script src="Gazetteer_files/Leaflet.extraMarkers/dist/js/leaflet.extra-markers.min.js"></script>
+<script src="../files/bootstrap-5.2.3-dist/js/bootstrap.js"></script>
+<script src="Gazetteer_files/date/date.js"></script>
+<script src="Gazetteer.js"></script>
+
+
+</body>
+</html>
+
+
+
+
+
